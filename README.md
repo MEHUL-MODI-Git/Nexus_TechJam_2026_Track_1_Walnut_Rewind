@@ -192,9 +192,11 @@ resolves silently: capsule construction refuses with a typed `ClarificationReque
 
 ```bash
 npm install
-cp .env.example .env    # if absent, create .env with the two vars below
-# .env: ARK_API_KEY=<Ark model API key>   ARK_MODEL=ep-<endpoint id>
-#       ARK_BASE_URL=<regional override if your key is not cn-beijing>
+# Create .env containing exactly these lines (do NOT copy .env.example for local
+# runs — it is written for the Docker/ECS image and sets container-only paths):
+#   ARK_API_KEY=<your Ark model API key>
+#   ARK_MODEL=ep-<your endpoint id>
+#   ARK_BASE_URL=<regional override, only if your key is not cn-beijing>
 colima start            # or Docker Desktop / rootless Podman
 set -a; . ./.env; set +a
 npm run poc             # one command: builds runtime image + web + server → http://localhost:3000
