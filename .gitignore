@@ -1,3 +1,4 @@
+# ── Starter kit (upstream RrankPyramid/CodeJam @ 8d0bd4f) ──────────────────────
 node_modules/
 dist/
 .env
@@ -14,3 +15,42 @@ coverage/
 deploy/volcengine/.terraform/
 deploy/volcengine/*.tfstate*
 deploy/volcengine/terraform.tfvars
+
+# ── Secrets (HC-4: no secret in source, history, logs, traces, or demo output) ─
+.env*
+!.env.example
+*.pem
+*.key
+*.p12
+secrets/
+**/ark-key*
+**/*credential*
+
+# ── Organizer-supplied material ────────────────────────────────────────────────
+# brief/ holds the TikTok TechJam PDF and the problem-statement screenshots.
+# This material belongs to the organizers. Redistributing it in a PUBLIC
+# submission repository is a maintainer decision — so the reversible
+# default is to ignore it. It stays on disk; it just does not ship.
+brief/
+
+# ── Bulky run artifacts ────────────────────────────────────────────────────────
+# results/ keeps small, auditable evidence (JSON, CSV, MD) — those are tracked,
+# because the truthfulness rule requires cited numbers to be reproducible from a
+# tracked file. Large captures and recordings are not.
+results/**/*.ndjson
+results/**/*.jsonl
+results/**/*.zip
+results/**/*.tar.gz
+*.mov
+*.mp4
+*.webm
+
+# ── Agent/runtime scratch ──────────────────────────────────────────────────────
+.walnut/tmp/
+*.local.json
+
+# ── Editor / OS ────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+Thumbs.db

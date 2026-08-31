@@ -7,6 +7,7 @@ import { z } from "zod";
 import type { AppConfig } from "./config.js";
 import { HttpError } from "./errors.js";
 import type { AgentService } from "./agent-service.js";
+import { registerWalnutRoutes, type WalnutRouteDeps } from "./walnut/routes/walnut-routes.js";
 
 const agentIdParams = z.object({ id: z.string().uuid() });
 const runIdParams = z.object({ id: z.string().uuid() });
@@ -26,6 +27,7 @@ const messageBody = z.object({
 export async function createApp(
   config: AppConfig,
   service: AgentService,
+  walnut?: WalnutRouteDeps,
 ): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -127,6 +129,19 @@ export async function createApp(
     const { id } = runIdParams.parse(request.params);
     return { run: service.getRun(id) };
   });
+
+  app.get("/api/runs/:id/capsule", async (request, reply) => {
+    const { id } = runIdParams.parse(request.params);
+    const capsule = await service.getCapsuleForRun(id);
+    if (capsule === null) {
+      return reply.code(404).send({ error: "No capsule for this run" });
+    }
+    return { capsule };
+  });
+
+  if (walnut !== undefined) {
+    registerWalnutRoutes(app, service, walnut);
+  }
 
   if (config.nodeEnv === "production") {
     const webRoot = fileURLToPath(new URL("../../web/dist", import.meta.url));

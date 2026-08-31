@@ -8,7 +8,9 @@ import type {
   RunUsage,
   RunnerRequest,
   RunnerResult,
+  RuntimeEventSink,
 } from "./types.js";
+import { createCodexJsonlConsumer } from "./walnut/evidence/consume-codex-jsonl.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -91,7 +93,10 @@ export function buildContainerRunArgs(
 export class ContainerCodexRunner implements AgentRunner {
   private readonly active = new Map<string, ActiveContainer>();
 
-  constructor(private readonly config: AppConfig) {}
+  constructor(
+    private readonly config: AppConfig,
+    private readonly sink: RuntimeEventSink | null = null,
+  ) {}
 
   async isAvailable(): Promise<boolean> {
     try {
@@ -172,7 +177,12 @@ export class ContainerCodexRunner implements AgentRunner {
       usage: null,
       errors: [],
     };
-    let stdout = "";
+    const consumer = createCodexJsonlConsumer({
+      request,
+      provider: "container",
+      sink: this.sink,
+      onLine: (line) => parseCodexEventLine(line, parsed),
+    });
     let stderr = "";
     let totalBytes = 0;
 
@@ -184,10 +194,7 @@ export class ContainerCodexRunner implements AgentRunner {
         return;
       }
       if (target === "stdout") {
-        stdout += chunk.toString("utf8");
-        const lines = stdout.split(/\r?\n/);
-        stdout = lines.pop() ?? "";
-        for (const line of lines) parseCodexEventLine(line, parsed);
+        consumer.consumeChunk(chunk.toString("utf8"));
       } else {
         stderr += chunk.toString("utf8");
         if (stderr.length > 16_384) stderr = stderr.slice(-16_384);
@@ -208,7 +215,8 @@ export class ContainerCodexRunner implements AgentRunner {
         child.once("error", reject);
         child.once("close", (code) => resolve(code ?? 1));
       });
-      if (stdout.trim()) parseCodexEventLine(stdout.trim(), parsed);
+      consumer.flush();
+      await consumer.done();
       if (active.cancelled) throw new RunCancelledError();
       if (active.timedOut) {
         throw new Error("Runtime timed out after " + this.config.codexTimeoutMs + " ms");

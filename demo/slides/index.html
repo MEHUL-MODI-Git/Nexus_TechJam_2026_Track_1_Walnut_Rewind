@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walnut Rewind — TechJam 2026 · Track 1</title>
+<style>
+  /* Palette: validated reference instance (dataviz skill, dark mode values). */
+  :root {
+    color-scheme: dark;
+    --page:        #0d0d0d;
+    --surface:     #1a1a19;
+    --ink:         #ffffff;
+    --ink-2:       #c3c2b7;
+    --ink-muted:   #898781;
+    --border:      rgba(255,255,255,0.10);
+    --accent:      #3987e5;   /* series-1 blue, dark step */
+    --good:        #0ca30c;
+    --warning:     #fab219;
+    --serious:     #ec835a;
+    --critical:    #d03b3b;
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--page); color: var(--ink); font-family: var(--font); }
+  .deck { height: 100%; position: relative; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0; display: none; flex-direction: column;
+    justify-content: center; padding: 6vh 8vw; gap: 2.6vh;
+  }
+  .slide.active { display: flex; }
+  .kicker { color: var(--accent); font-size: 2.1vh; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  h1 { font-size: 7.4vh; line-height: 1.06; font-weight: 800; letter-spacing: -0.015em; }
+  h2 { font-size: 5.2vh; line-height: 1.1; font-weight: 750; letter-spacing: -0.01em; max-width: 30ch; }
+  .sub { font-size: 2.8vh; color: var(--ink-2); max-width: 62ch; line-height: 1.45; }
+  .sub strong { color: var(--ink); font-weight: 650; }
+  ul.points { list-style: none; display: flex; flex-direction: column; gap: 1.8vh; max-width: 78ch; }
+  ul.points li { font-size: 2.75vh; line-height: 1.4; color: var(--ink-2); padding-left: 2.2ch; position: relative; }
+  ul.points li::before { content: ""; position: absolute; left: 0; top: 1.15vh; width: .9ch; height: .9ch; border-radius: 2px; background: var(--accent); }
+  ul.points li strong { color: var(--ink); font-weight: 650; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: .1em .45em; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3vh 2.4vh 2.6vh; display: flex; flex-direction: column; gap: .8vh; }
+  .tile .value { font-size: 6.2vh; font-weight: 800; letter-spacing: -0.02em; }
+  .tile .value small { font-size: 55%; font-weight: 650; color: var(--ink-2); }
+  .tile .label { font-size: 2.1vh; color: var(--ink-2); line-height: 1.35; }
+  .chip { display: inline-flex; align-items: center; gap: .5ch; font-size: 1.9vh; font-weight: 700; letter-spacing: .06em; padding: .35em .8em; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); }
+  .chip::before { content: ""; width: .85em; height: .85em; border-radius: 3px; background: var(--c, var(--ink-muted)); }
+  .chip.good     { --c: var(--good); }
+  .chip.critical { --c: var(--critical); }
+  .chip.warning  { --c: var(--warning); }
+  .chip.serious  { --c: var(--serious); }
+  .chiprow { display: flex; gap: 1.4vh; flex-wrap: wrap; }
+  .flow { display: flex; align-items: stretch; gap: 1vh; flex-wrap: nowrap; }
+  .flow .step { flex: 1 1 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.6vh 1.7vh; font-size: 1.95vh; color: var(--ink-2); line-height: 1.35; }
+  .flow .step b { color: var(--ink); display: block; margin-bottom: .4vh; font-size: 2.2vh; }
+  .flow .arrow { align-self: center; color: var(--ink-muted); font-size: 2.6vh; flex: 0 0 auto; }
+  .boundary { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .foot { position: absolute; bottom: 3.2vh; left: 8vw; right: 8vw; display: flex; justify-content: space-between; font-size: 1.75vh; color: var(--ink-muted); }
+  .foot .src { max-width: 80ch; }
+  .dots { position: absolute; bottom: 3.2vh; right: 8vw; display: flex; gap: .8vh; }
+  .dots i { width: 1.1vh; height: 1.1vh; border-radius: 50%; background: var(--border); }
+  .dots i.on { background: var(--accent); }
+  table.rubric { border-collapse: collapse; font-size: 2.35vh; max-width: 100ch; }
+  table.rubric td { padding: 1.2vh 2ch 1.2vh 0; border-bottom: 1px solid var(--border); color: var(--ink-2); vertical-align: top; line-height: 1.35; }
+  table.rubric td:first-child { color: var(--ink); font-weight: 650; white-space: nowrap; }
+  table.rubric td.w { color: var(--accent); font-weight: 800; white-space: nowrap; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4vh; align-items: start; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide active">
+    <div class="kicker">TikTok TechJam 2026 · Track 1 · Agent Launchpad middleware</div>
+    <h1>Walnut Rewind</h1>
+    <p class="sub"><strong>Evidence &amp; authorization middleware for AI agents.</strong>
+    It controls what an agent is allowed to know, proves what it actually knew,
+    and repairs the damage when a source turns out to be wrong.</p>
+    <div class="chiprow">
+      <span class="chip good">VERIFIED — byte-exact citations</span>
+      <span class="chip critical">DENIED — before the prompt exists</span>
+      <span class="chip serious">TAINTED — precise blast radius</span>
+      <span class="chip good">RECOVERED — history never rewritten</span>
+    </div>
+    <div class="foot"><span class="src">Additive middleware on the Agent Launchpad starter kit — baseline behavior preserved, upstream tests untouched · every behavior runs server-side (a UI-only feature fails our own gates)</span></div>
+  </section>
+
+  <!-- 2 · Problem -->
+  <section class="slide">
+    <div class="kicker">The problem</div>
+    <h2>An agent will act on whatever reaches its context.</h2>
+    <ul class="points">
+      <li><strong>Restricted data sits next to useful data.</strong> Nothing stops a payroll file from leaking into a launch-planning prompt — and nothing proves it didn't.</li>
+      <li><strong>Facts change.</strong> A launch date slips; yesterday's runs silently disagree with today's, and the agent picks one without telling anyone.</li>
+      <li><strong>Sources get compromised.</strong> When a trusted input turns out tampered, nobody can say which decisions were built on it — or what to rebuild.</li>
+    </ul>
+    <p class="sub">Logs tell you what an agent <strong>did</strong>. Nothing tells you what it was <strong>allowed to know</strong>, why it <strong>believed</strong> it, and what to do when the belief goes bad.</p>
+  </section>
+
+  <!-- 3 · What we built -->
+  <section class="slide">
+    <div class="kicker">What we built · additive middleware, four modules</div>
+    <h2>The model proposes. The middleware verifies, authorizes, and records.</h2>
+    <ul class="points">
+      <li><strong>Evidence runtime</strong> — every run gets a hash-chained, redact-before-persist flight recorder; evidence proposals only become evidence after an exact byte-match against their source.</li>
+      <li><strong>Context &amp; authorization</strong> — grants are checked <strong>before</strong> the prompt is built; the run executes against a sealed Context Capsule; agent-to-agent shares are re-authorized on both legs.</li>
+      <li><strong>Dependency &amp; rewind</strong> — a projected graph links evidence → capsules → runs → artifacts; compromise triggers a precise blast radius; recovery is a new run, never an edit.</li>
+      <li><strong>Platform</strong> — REST surface + four drawer tabs in the existing UI, rendering live backend state.</li>
+    </ul>
+    <div class="foot"><span class="src">Focused, additive change over the pristine baseline tag — reviewable in one command: <code>git diff starter-kit-baseline --stat</code> · upstream tests unmodified and green</span></div>
+  </section>
+
+  <!-- 4 · How a run works -->
+  <section class="slide">
+    <div class="kicker">One run, end to end · enforcement happens before context construction</div>
+    <h2>Where the trust boundary sits</h2>
+    <div class="flow">
+      <div class="step"><b>Prompt</b>user asks in the Playground</div>
+      <div class="arrow">→</div>
+      <div class="step boundary"><b>Authorize</b>every candidate evidence: ALLOW / DENY, decision recorded with policy revision</div>
+      <div class="arrow">→</div>
+      <div class="step boundary"><b>Seal capsule</b>exactly what this run may know, under one hash — a lockfile for knowledge</div>
+      <div class="arrow">→</div>
+      <div class="step"><b>Model runs</b>in its container; it can only <i>propose</i> evidence</div>
+      <div class="arrow">→</div>
+      <div class="step boundary"><b>Verify + record</b>byte-match citations; redact; hash-chain every event; project the graph</div>
+    </div>
+    <p class="sub">Everything inside the highlighted boxes is middleware, server-side, covered by automated tests. The UI never enforces anything — it only renders what the backend proved.</p>
+    <div class="foot"><span class="src">Full diagram with the trust boundary: README §4.1 · contracts: docs/walnut/04</span></div>
+  </section>
+
+  <!-- 5 · Proof: authorization before context -->
+  <section class="slide">
+    <div class="kicker">Proof 1 · authorization before context (live in the demo)</div>
+    <h2>The denied payroll data never reached the model.</h2>
+    <ul class="points">
+      <li>A <strong>planted canary</strong> rides in the restricted payroll claim. After the Strategy run: <strong>0 occurrences</strong> in the rendered prompt, <strong>0</strong> in the sealed capsule, <strong>0</strong> in the run's ledger chain — while remaining present in the evidence store. <strong>Stored ≠ rendered.</strong></li>
+      <li>The DENY is a first-class record: reason <code>AGENT_SCOPE_MISSING</code>, decision id, policy revision + hash.</li>
+      <li>The delegation ceiling holds too: an agent <strong>sharing on behalf of a human</strong> is capped by that human's authority — <code>DENY · PRINCIPAL_SCOPE_MISSING</code>, enforced in the two-leg evaluator, no UI involved.</li>
+    </ul>
+    <div class="foot"><span class="src">Verified live twice: results/p3-demo-rehearsal.md (INV-2 grep: 0/0/present) · results/p3-walkthrough-rehearsal.md §4–5 · tests: capsule + share-service suites</span></div>
+  </section>
+
+  <!-- 6 · Proof: citations + flight recorder -->
+  <section class="slide">
+    <div class="kicker">Proof 2 · evidence you can check, not vibes</div>
+    <h2>A citation is bytes, or it is rejected.</h2>
+    <ul class="points">
+      <li>Every claim must quote its source and the quote must satisfy <code>source[start:end] === quote</code>. In the demo, the model's third proposal fails by a few bytes → <strong>rejected, <code>citation_mismatch</code></strong>, with the exact range in the ledger — regardless of model confidence.</li>
+      <li>Every runtime event we observe — commands, file changes, model steps — lands in a <strong>hash-chained, redacted ledger</strong>. Corrupt a copy at any sequence and verification answers <code>ok:false · brokenAtSequence · hash_mismatch</code> — while the real chain stays intact.</li>
+      <li>Secrets are redacted <strong>before</strong> persistence — proven with planted canaries for an API key, bearer token, private key, and env values.</li>
+    </ul>
+    <div class="foot"><span class="src">Measured: rejection event with byte range content[28:61] (results/p3-walkthrough-rehearsal.md §B1) · tamper: brokenAtSequence pinpointed (both rehearsals)</span></div>
+  </section>
+
+  <!-- 7 · Proof: blast radius + rewind -->
+  <section class="slide">
+    <div class="kicker">Proof 3 · when a source goes bad</div>
+    <h2>Precise blast radius. Selective recovery. History stays append-only.</h2>
+    <ul class="points">
+      <li>Compromising one launch claim flagged <strong>exactly</strong> the two runs and one artifact built on it — an unrelated earlier run was <strong>not</strong> re-flagged. Precision, not blanket invalidation.</li>
+      <li><strong>Rewind</strong> = a brand-new run with a fresh capsule (the bad claim now status-denied). The old run becomes <code>RECOVERED</code>, linked <code>RECOVERED_BY</code> — its capsule hash and event chain byte-identical after recovery.</li>
+      <li>Conflicting evidence never gets a silent pick: the run is <strong>blocked before any model call</strong> — a typed clarification request, at a measured cost of <strong>0 model tokens</strong>.</li>
+    </ul>
+    <div class="foot"><span class="src">Measured end-to-end 2026-08-28: results/p3-walkthrough-rehearsal.md §§3, 7–8 (blast radius ids, byte-identical chain, usage:null on the blocked run)</span></div>
+  </section>
+
+  <!-- 8 · Numbers -->
+  <section class="slide">
+    <div class="kicker">The numbers · every one reproducible from a tracked artifact</div>
+    <h2>Verified, not asserted.</h2>
+    <div class="tiles">
+      <div class="tile"><div class="value">233 <small>tests · 27 files</small></div><div class="label"><code>npm run check</code> exit 0 — typecheck, full server suite, both production builds (re-run 2026-08-31)</div></div>
+      <div class="tile"><div class="value">0 <small>vulnerabilities</small></div><div class="label"><code>npm audit --omit=dev</code> on the shipped dependency tree</div></div>
+      <div class="tile"><div class="value">12 <small>stages · 3× no-flake</small></div><div class="label">one end-to-end thesis test: capsule → denial → compromise → taint → reconcile → RECOVERED_BY</div></div>
+      <div class="tile"><div class="value">0 <small>console errors</small></div><div class="label">real-Chrome visual pass: 24 screenshots, 0 failed requests, baseline CRUD + live run + all four tabs</div></div>
+      <div class="tile"><div class="value">0 <small>model tokens</small></div><div class="label">to block a run on conflicting evidence — typed clarification, pre-model, measured <code>usage: null</code></div></div>
+      <div class="tile"><div class="value">1 <small>command</small></div><div class="label"><code>npm run poc</code> — local app/container path; no separately provisioned cloud infrastructure, no hidden setup</div></div>
+    </div>
+    <div class="foot"><span class="src">Sources: results/pre-submission-check-2026-08-31.md · results/p2-visual-pass.md · results/p3-walkthrough-rehearsal.md · apps/server/src/walnut/e2e.test.ts</span></div>
+  </section>
+
+  <!-- 9 · Limitations -->
+  <section class="slide">
+    <div class="kicker">Honest limitations · stated, because that is the product</div>
+    <h2>What we deliberately do not claim.</h2>
+    <ul class="points">
+      <li>The runtime stream is <strong>Codex-emitted events, not complete provider telemetry</strong> — we do not claim every physical model request/retry is observed, and JSONL is not a pre-command enforcement boundary.</li>
+      <li>The Docker container is an isolation convenience, <strong>not a hardened multi-tenant sandbox</strong>; the grant model is hackathon-scale, not production OAuth.</li>
+      <li><strong>Redaction ≠ anonymization</strong>; hash chaining proves recorded history is intact — <strong>not</strong> that an unobserved action never happened.</li>
+      <li>The evidence-pack export was <strong>cut</strong>, not stubbed — it is absent and documented as such.</li>
+    </ul>
+    <div class="foot"><span class="src">Full list: README §15 — a gate item in our own review process, kept current at every gate</span></div>
+  </section>
+
+  <!-- 10 · Reproduce / fit -->
+  <section class="slide">
+    <div class="kicker">Reproduce it · then judge it</div>
+    <h2>Three commands. One story. Every claim traceable.</h2>
+    <div class="two-col">
+      <div>
+        <p class="sub" style="margin-bottom:1.6vh"><code>npm install</code><br><code>ARK_API_KEY=… ARK_MODEL=ep-… npm run poc</code><br><code>npm run check</code></p>
+        <p class="sub">Judge-runnable, beat-by-beat: <code>demo/FULL-WALKTHROUGH.md</code><br>
+        23-capability relevance map: README §18<br>
+        Full demo scenario, judge-runnable: <code>demo/FULL-WALKTHROUGH.md</code></p>
+      </div>
+      <table class="rubric">
+        <tr><td>End-to-end behavior</td><td class="w">40%</td><td>real React → Fastify → Runtime → ledger → graph path; nothing is a static screen</td></tr>
+        <tr><td>Design &amp; integration</td><td class="w">25%</td><td>one coherent story, four-plane boundary, frozen contracts, additive diff</td></tr>
+        <tr><td>Verification &amp; robustness</td><td class="w">20%</td><td>the failure cases are the demo: denial, rejection, taint, tamper, typed clarification</td></tr>
+        <tr><td>Demo &amp; reproducibility</td><td class="w">15%</td><td>≤3-min script, one-command start, documented limitations, no hidden setup</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span class="src">Walnut Rewind · TikTok TechJam 2026 Track 1 · rubric: brief §1.11</span></div>
+  </section>
+
+  <div class="dots" id="dots"></div>
+</div>
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const dots = document.getElementById("dots");
+  slides.forEach(() => dots.appendChild(document.createElement("i")));
+  let i = 0;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle("active", k === i));
+    [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+  }
+  addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+  });
+  addEventListener("click", (e) => { if (!e.target.closest("a")) show(i + 1); });
+  show(0);
+</script>
+</body>
+</html>

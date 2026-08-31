@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, setAuthToken } from "./api";
 import type { Agent, AgentRun, Message, SystemInfo } from "./types";
+import { WalnutDrawer } from "./walnut/WalnutDrawer";
 
 const starterPrompts = [
   "Create a small TypeScript CLI that prints a weather summary from sample JSON.",
@@ -45,6 +46,7 @@ export default function App() {
   const [form, setForm] = useState(emptyForm);
   const [prompt, setPrompt] = useState("");
   const [activeRun, setActiveRun] = useState<AgentRun | null>(null);
+  const [showWalnut, setShowWalnut] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authRequired, setAuthRequired] = useState<boolean | null>(null);
@@ -99,6 +101,7 @@ export default function App() {
   useEffect(() => {
     setActiveRun(null);
     setShowSettings(false);
+    setShowWalnut(false);
     if (!selectedId) {
       setMessages([]);
       return;
@@ -212,6 +215,28 @@ export default function App() {
         if (selectedIdRef.current === agentId) setActiveRun(result.run);
         if (!["queued", "running"].includes(result.run.status)) {
           await Promise.all([refreshMessages(agentId), refreshAgents()]);
+          return;
+        }
+      }
+    } finally {
+      pollingRunIds.current.delete(runId);
+    }
+  };
+
+  // A Walnut reconcile mints a replacement Run outside the send-message path. Watch it
+  // WITHOUT touching activeRun (the drawer must stay on the recovered run the user is
+  // inspecting) and refresh the chat as its user/assistant messages land.
+  const watchReplacementRun = async (runId: string, agentId: string) => {
+    if (pollingRunIds.current.has(runId)) return;
+    pollingRunIds.current.add(runId);
+    try {
+      while (mountedRef.current) {
+        await new Promise((resolve) => window.setTimeout(resolve, 900));
+        if (!mountedRef.current) return;
+        const result = await api.run(runId);
+        if (!["queued", "running"].includes(result.run.status)) {
+          if (selectedIdRef.current === agentId) await refreshMessages(agentId);
+          await refreshAgents();
           return;
         }
       }
@@ -362,7 +387,7 @@ export default function App() {
           <span className="eyebrow">Runtime</span>
           <strong>{system?.runtime ?? "Checking…"}</strong>
           <span>
-            {system?.arkModel ?? "Ark model not configured"}
+            {system?.arkConfigured ? "Ark endpoint configured" : "Ark endpoint not configured"}
             {system?.containerEngine ? " · " + system.containerEngine : ""}
           </span>
         </div>
@@ -483,9 +508,20 @@ export default function App() {
                   <span className="eyebrow">Playground</span>
                   <h2>Build something with your Agent</h2>
                 </div>
-                <div className="session-info">
-                  <span className="pulse" />
-                  {selected.codexThreadId ? "Session connected" : "New session"}
+                <div className="playground-topbar-actions">
+                  {activeRun && (
+                    <button
+                      type="button"
+                      className="button button-ghost walnut-toggle"
+                      onClick={() => setShowWalnut((value) => !value)}
+                    >
+                      {showWalnut ? "Hide Walnut" : "Walnut"}
+                    </button>
+                  )}
+                  <div className="session-info">
+                    <span className="pulse" />
+                    {selected.codexThreadId ? "Session connected" : "New session"}
+                  </div>
                 </div>
               </div>
 
@@ -582,6 +618,19 @@ export default function App() {
                 </div>
               </form>
             </section>
+
+            {activeRun && showWalnut && (
+              <section className="walnut-section">
+                <WalnutDrawer
+                  runId={activeRun.id}
+                  onReconciled={(reconciliation) => {
+                    if (!selected) return;
+                    void refreshMessages(selected.id);
+                    void watchReplacementRun(reconciliation.replacementRunId, selected.id);
+                  }}
+                />
+              </section>
+            )}
           </>
         ) : (
           <div className="no-agent">

@@ -1,4 +1,16 @@
 import type { Agent, AgentRun, Message, SystemInfo } from "./types";
+import type {
+  AttestationResponse,
+  ClarificationsResponse,
+  DependenciesResponse,
+  HistoryResponse,
+  ReconcileResponse,
+  RevokeCompromiseResponse,
+  RunEvidenceResponse,
+  RunEventsResponse,
+  RunWalnutOverview,
+  VerifyResponse,
+} from "./walnut/types";
 
 export class ApiError extends Error {
   constructor(
@@ -78,4 +90,37 @@ export const api = {
       },
     ),
   run: (id: string) => request<{ run: AgentRun }>("/api/runs/" + id),
+  walnutOverview: (runId: string) =>
+    request<RunWalnutOverview>("/api/runs/" + runId + "/walnut"),
+  walnutEvidence: (runId: string) =>
+    request<RunEvidenceResponse>("/api/runs/" + runId + "/evidence"),
+  walnutEvents: (runId: string) =>
+    request<RunEventsResponse>("/api/runs/" + runId + "/events"),
+  walnutVerify: (runId: string) =>
+    request<VerifyResponse>("/api/runs/" + runId + "/evidence/verify"),
+  walnutDependencies: (runId: string) =>
+    request<DependenciesResponse>("/api/runs/" + runId + "/dependencies"),
+  walnutHistory: (runId: string, knownAt?: string) =>
+    request<HistoryResponse>(
+      "/api/runs/" +
+        runId +
+        "/history" +
+        (knownAt ? "?knownAt=" + encodeURIComponent(knownAt) : ""),
+    ),
+  walnutAttestation: (runId: string) =>
+    request<AttestationResponse>("/api/runs/" + runId + "/attestation"),
+  walnutClarifications: () =>
+    request<ClarificationsResponse>("/api/walnut/clarifications"),
+  reconcile: (runId: string) =>
+    request<ReconcileResponse>("/api/runs/" + runId + "/reconcile", { method: "POST" }),
+  revokeEvidence: (evidenceId: string, reason: string) =>
+    request<RevokeCompromiseResponse>("/api/evidence/" + evidenceId + "/revoke", {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+  compromiseEvidence: (evidenceId: string, reason: string) =>
+    request<RevokeCompromiseResponse>("/api/evidence/" + evidenceId + "/compromise", {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
 };

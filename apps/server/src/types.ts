@@ -73,6 +73,20 @@ export interface RunnerRequest {
   workspacePath: string;
   prompt: string;
   threadId: string | null;
+  runId: string;
+  principalId: string | null;
+  agentVersionId: string;
+  contextCapsuleId: string;
+}
+
+export interface RuntimeEventSink {
+  accept(input: {
+    runId: string;
+    agentId: string;
+    provider: "local-process" | "container";
+    rawEvent: unknown;
+    receivedAt: string;
+  }): Promise<void>;
 }
 
 export interface AgentRunner {
