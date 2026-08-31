@@ -3,6 +3,8 @@
 **Evidence-and-authorization middleware for AI agent platforms.**
 TikTok TechJam 2026 · Track 1 — Agent Launchpad: Design and Build Lightweight Agent Middleware.
 
+**▶ 3-minute demo video: https://youtu.be/PGvlZ4ji-No**
+
 Built on the pristine [Volc Agent Launchpad starter kit](docs/UPSTREAM-README.md) (tag
 `starter-kit-baseline`); everything Walnut adds is visible as `git diff starter-kit-baseline`.
 
@@ -239,8 +241,9 @@ The suite includes per-invariant tests (INV-1…INV-22 mapped in
 `docs/walnut/06-IMPLEMENTATION-TEST-DEMO-PLAN.md` §6), the ledger tamper matrix, the redactor
 canary battery, and `walnut/e2e.test.ts` — the single end-to-end test that walks the full
 thesis: fake runtime → capsule with authorized + denied-canary evidence → ordered redacted
-chain → compromise → blast radius → TAINTED → reconcile → RECOVERED_BY. Current counts are in
-the CI gate output; at submission time: see `results/p3-final-check.md`.
+chain → compromise → blast radius → TAINTED → reconcile → RECOVERED_BY. Counts at submission: **233 tests in 27 files**, `npm run check` exit 0 —
+`results/pre-submission-check-2026-08-31.md` (the earlier `results/p3-final-check.md` is the
+Phase-3-exit snapshot at 215 tests; the suite grew after it).
 
 ## 13. Failure cases (by design)
 
