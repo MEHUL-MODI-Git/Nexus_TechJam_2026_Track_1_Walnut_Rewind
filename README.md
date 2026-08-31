@@ -205,7 +205,7 @@ cloud resource is required (HC-9).
 
 ## 11. Demo
 
-**Demo video:** `<YOUTUBE_URL — inserted at submission>` (3 minutes, public).
+**Demo video:** https://youtu.be/PGvlZ4ji-No (3 minutes, public).
 
 The demo scenario is **"Launch Control Incident"**: an AI launch team acts on a trusted launch
 date while payroll data stays restricted; the date's source is later compromised, and Walnut
